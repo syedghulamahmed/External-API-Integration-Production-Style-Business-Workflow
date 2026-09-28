@@ -1,0 +1,13 @@
+{
+  "info": {
+    "name": "TalentBridge Week 4 Business Workflow",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {"name":"List open internships","request":{"method":"GET","url":"http://localhost:4000/api/internships"}},
+    {"name":"Submit application after deadline -> expect 409","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{studentToken}}"},{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{"internshipId":"{{expiredInternshipId}}"}"},"url":"http://localhost:4000/api/applications"}},
+    {"name":"Company status change on own application","request":{"method":"PATCH","header":[{"key":"Authorization","value":"Bearer {{companyToken}}"},{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{"status":"UNDER_REVIEW"}"},"url":"http://localhost:4000/api/applications/{{ownApplicationId}}/status"}},
+    {"name":"Company status change on another company's application -> expect 403","request":{"method":"PATCH","header":[{"key":"Authorization","value":"Bearer {{companyToken}}"},{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{"status":"UNDER_REVIEW"}"},"url":"http://localhost:4000/api/applications/{{otherCompanyApplicationId}}/status"}},
+    {"name":"Student submits duplicate application -> expect 409","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{studentToken}}"},{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{"internshipId":"{{alreadyAppliedInternshipId}}"}"},"url":"http://localhost:4000/api/applications"}}
+  ]
+}
