@@ -12,7 +12,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const isRetryable = (error: unknown) => {
   const message = error instanceof Error ? error.message : String(error);
-  return /429|timeout|timed out|5\\d\\d|network|fetch/i.test(message);
+  return /429|timeout|timed out|5\d\d|network|fetch/i.test(message);
 };
 
 async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
