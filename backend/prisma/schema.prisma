@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  STUDENT
+  COMPANY
+  ADMIN
+}
+
+enum ApplicationStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+model User {
+  id            String          @id @default(cuid())
+  email         String          @unique
+  name          String
+  passwordHash  String
+  role          UserRole
+  isActive      Boolean         @default(true)
+  student       Student?
+  company       Company?
+  applications  Application[]   @relation("StudentApplications")
+  refreshTokens RefreshToken[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  @@index([role])
+}
+
+model Student {
+  id             String @id @default(cuid())
+  userId         String @unique
+  university     String?
+  graduationYear Int?
+  user           User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Company {
+  id          String @id @default(cuid())
+  userId      String @unique
+  companyName String
+  website     String?
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  internships Internship[]
+}
+
+model Internship {
+  id                  String @id @default(cuid())
+  companyId           String
+  title               String
+  description         String
+  location            String?
+  applicationDeadline DateTime
+  isActive            Boolean @default(true)
+  company             Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  applications        Application[]
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  @@index([companyId, isActive])
+  @@index([applicationDeadline, isActive])
+}
+
+model Application {
+  id           String @id @default(cuid())
+  internshipId String
+  studentId    String
+  status       ApplicationStatus @default(SUBMITTED)
+  internship   Internship @relation(fields: [internshipId], references: [id], onDelete: Cascade)
+  student      User @relation("StudentApplications", fields: [studentId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  @@unique([studentId, internshipId])
+  @@index([studentId, status])
+  @@index([internshipId, status])
+}
+
+model RefreshToken {
+  id        String @id @default(cuid())
+  tokenHash String @unique
+  userId    String
+  expiresAt DateTime
+  revokedAt DateTime?
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, revokedAt])
+}
