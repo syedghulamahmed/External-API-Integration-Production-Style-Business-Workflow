@@ -1,0 +1,57 @@
+openapi: 3.0.3
+info:
+  title: TalentBridge Week 4 Business Workflow API
+  version: 1.0.0
+servers:
+  - url: http://localhost:4000/api
+paths:
+  /internships:
+    get:
+      summary: List open internships
+      responses:
+        "200": { description: OK }
+    post:
+      summary: Create internship
+      responses:
+        "201": { description: Created }
+        "401": { description: Authentication required }
+        "403": { description: Company/admin role required }
+        "409": { description: Posting limit or invalid deadline }
+  /internships/mine:
+    get:
+      summary: List postings visible to the owning company/admin
+      responses:
+        "200": { description: OK }
+        "401": { description: Authentication required }
+        "403": { description: Forbidden }
+  /applications:
+    post:
+      summary: Submit an application
+      responses:
+        "201": { description: Created; email is best-effort }
+        "401": { description: Authentication required }
+        "403": { description: Student role required }
+        "409": { description: Deadline, closed posting, or duplicate application }
+    get:
+      summary: List applications visible to the current role
+      responses:
+        "200": { description: OK }
+        "401": { description: Authentication required }
+  /applications/{id}/status:
+    patch:
+      summary: Update application status
+      responses:
+        "200": { description: Saved; notification is best-effort }
+        "401": { description: Authentication required }
+        "403": { description: Wrong role or non-owning company }
+        "409": { description: Invalid status transition }
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code: { type: string }
+            message: { type: string }
